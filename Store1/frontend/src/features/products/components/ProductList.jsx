@@ -23,6 +23,7 @@ import { motion } from 'framer-motion'
 import { ProductBanner } from './ProductBanner'
 import ClearIcon from '@mui/icons-material/Clear';
 import Lottie from 'lottie-react'
+import { useNavigate } from 'react-router-dom'
 
 
 const sortOptions=[
@@ -34,6 +35,7 @@ const sortOptions=[
 const bannerImages=[banner1,banner3,banner2,banner4]
 
 export const ProductList = () => {
+    const navigate = useNavigate();
     const [filters,setFilters]=useState({})
     const [page,setPage]=useState(1)
     const [sort,setSort]=useState(null)
@@ -173,6 +175,10 @@ export const ProductList = () => {
         dispatch(toggleFilters())
     }
 
+    const handleProductClick = (productId) => {
+        navigate(`/product-details/${productId}`);
+    }
+
   return (
     <>
     {/* filters side bar */}
@@ -297,7 +303,17 @@ export const ProductList = () => {
                     <Grid gap={is700?1:2} container justifyContent={'center'} alignContent={'center'}>
                         {
                             products.map((product)=>(
-                                <ProductCard key={product._id} id={product._id} title={product.title} thumbnail={product.thumbnail} brand={product.brand.name} price={product.price} handleAddRemoveFromWishlist={handleAddRemoveFromWishlist}/>
+                                <ProductCard 
+                                    key={product._id} 
+                                    id={product._id} 
+                                    title={product.title} 
+                                    thumbnail={product.thumbnail} 
+                                    brand={product.brand.name} 
+                                    price={product.price} 
+                                    handleAddRemoveFromWishlist={handleAddRemoveFromWishlist}
+                                    onClick={() => handleProductClick(product._id)}
+                                    sx={{ cursor: 'pointer' }}
+                                />
                             ))
                         }
                     </Grid>
