@@ -78,7 +78,17 @@ export const AdminOrders = () => {
     dispatch(updateOrderByIdAsync(update));
   };
 
-  const editOptions = ['Pending', 'Dispatched', 'Out for delivery', 'Delivered', 'Cancelled'];
+  const editOptions = [
+    'Pending', 
+    'Dispatched', 
+    'Out for delivery', 
+    'Delivered', 
+    'Cancelled',
+    'Return Requested',
+    'Return Approved',
+    'Return Rejected',
+    'Returned'
+  ];
 
   const getStatusColor = (status) => {
     if (status === 'Pending') {
@@ -92,6 +102,38 @@ export const AdminOrders = () => {
     } else if (status === 'Cancelled') {
       return { bgcolor: '#fac0c0', color: '#cc6d72' };
     }
+    switch(status) {
+      case 'Return Requested':
+        return { bgcolor: '#fff3cd', color: '#856404' };
+      case 'Return Approved':
+        return { bgcolor: '#d4edda', color: '#155724' };
+      case 'Return Rejected':
+        return { bgcolor: '#f8d7da', color: '#721c24' };
+      case 'Returned':
+        return { bgcolor: '#cce5ff', color: '#004085' };
+    }
+  };
+
+  const ReturnRequestDetails = ({ order }) => {
+    return (
+      <Stack spacing={2} p={2}>
+        <Typography variant="subtitle1">Return Request Details</Typography>
+        <Typography>Reason: {order.returnRequest?.reason}</Typography>
+        <Typography>Request Date: {new Date(order.returnRequest?.requestDate).toLocaleString()}</Typography>
+        {order.returnRequest?.images?.length > 0 && (
+          <Stack direction="row" spacing={1}>
+            {order.returnRequest.images.map((image, index) => (
+              <img 
+                key={index}
+                src={image}
+                alt={`Return image ${index + 1}`}
+                style={{ width: 100, height: 100, objectFit: 'cover' }}
+              />
+            ))}
+          </Stack>
+        )}
+      </Stack>
+    );
   };
 
   // Add loading state handling
@@ -195,6 +237,11 @@ export const AdminOrders = () => {
                         <IconButton onClick={() => setEditIndex(index)}>
                           <EditOutlinedIcon />
                         </IconButton>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {order.returnRequest?.status !== 'None' && (
+                        <ReturnRequestDetails order={order} />
                       )}
                     </TableCell>
                   </TableRow>

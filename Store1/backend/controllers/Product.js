@@ -159,4 +159,18 @@ exports.searchProducts = async (req, res) => {
   }
 };
 
+exports.updateStock = async (req, res) => {
+    try {
+        const { quantity, type, reason } = req.body;
+        const product = await Product.findById(req.params.id);
+        
+        if (!product) throw new Error('Product not found');
+
+        await product.updateStock(quantity, type, reason);
+        res.json(product);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
 

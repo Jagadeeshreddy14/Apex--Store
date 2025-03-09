@@ -22,7 +22,11 @@ const userSchema=new Schema({
     isAdmin:{
         type:Boolean,
         default:false
-    }
+    },
+    phoneNumber: { type: String },
+    isPhoneVerified: { type: Boolean, default: false },
+    authProvider: { type: String, enum: ['local', 'google'], default: 'local' },
+    avatar: String
 })
 
 module.exports=mongoose.model("User",userSchema)

@@ -1,5 +1,21 @@
-const User = require("../models/User");
-const bcrypt=require('bcryptjs');
+require('dotenv').config();
+const { OAuth2Client } = require('google-auth-library');
+const twilio = require('twilio');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const User = require('../models/User');
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+let twilioClient = null;
+
+// Initialize Twilio client only if credentials are available
+if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+    twilioClient = twilio(
+        process.env.TWILIO_ACCOUNT_SID,
+        process.env.TWILIO_AUTH_TOKEN
+    );
+}
+
 const { sendMail } = require("../utils/Emails");
 const { generateOTP } = require("../utils/GenerateOtp");
 const Otp = require("../models/OTP");
@@ -258,3 +274,117 @@ exports.checkAuth=async(req,res)=>{
         res.sendStatus(500)
     }
 }
+
+exports.googleSignIn = async (req, res) => {
+    try {
+      const { token } = req.body;
+      const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: process.env.GOOGLE_CLIENT_ID
+      });
+  
+      const { email, name, picture } = ticket.getPayload();
+      let user = await User.findOne({ email });
+  
+      if (!user) {
+        user = await User.create({
+          email,
+          name,
+          avatar: picture,
+          isVerified: true,
+          authProvider: 'google'
+        });
+      }
+  
+      const authToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+      res.status(200).json({ token: authToken, user });
+  
+    } catch (error) {
+      console.error('Google sign in error:', error);
+      res.status(500).json({ message: 'Authentication failed' });
+    }
+  };
+
+// Send OTP via SMS
+exports.sendMobileOTP = async (req, res) => {
+    try {
+        if (!twilioClient) {
+            return res.status(503).json({ 
+                message: 'SMS service not configured' 
+            });
+        }
+
+        const { phoneNumber } = req.body;
+        const otp = Math.floor(100000 + Math.random() * 900000);
+        
+        // Save OTP logic here...
+
+        // Send OTP via Twilio
+        await twilioClient.messages.create({
+            body: `Your verification code is: ${otp}`,
+            to: phoneNumber,
+            from: process.env.TWILIO_PHONE_NUMBER
+        });
+
+        res.status(200).json({ 
+            message: 'OTP sent successfully',
+            phoneNumber 
+        });
+
+    } catch (error) {
+        console.error('Mobile OTP error:', error);
+        res.status(500).json({ 
+            message: 'Error sending OTP',
+            error: error.message 
+        });
+    }
+};
+
+// Verify Mobile OTP
+exports.verifyMobileOTP = async (req, res) => {
+  try {
+    const { phoneNumber, otp } = req.body;
+
+    const otpRecord = await Otp.findOne({ 
+      phoneNumber,
+      expiresAt: { $gt: new Date() }
+    });
+
+    if (!otpRecord) {
+      return res.status(400).json({ 
+        message: 'OTP expired or not found' 
+      });
+    }
+
+    const isValid = await bcrypt.compare(otp.toString(), otpRecord.otp);
+
+    if (!isValid) {
+      return res.status(400).json({ 
+        message: 'Invalid OTP' 
+      });
+    }
+
+    // Update user's phone verification status
+    await User.findByIdAndUpdate(
+      req.user._id, 
+      { 
+        phoneNumber,
+        isPhoneVerified: true 
+      }
+    );
+
+    // Delete used OTP
+    await Otp.deleteOne({ _id: otpRecord._id });
+
+    res.status(200).json({ 
+      message: 'Phone number verified successfully' 
+    });
+
+  } catch (error) {
+    console.error('Mobile verification error:', error);
+    res.status(500).json({ 
+      message: 'Verification failed',
+      error: error.message 
+    });
+  }
+};

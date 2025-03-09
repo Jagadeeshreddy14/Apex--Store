@@ -17,7 +17,7 @@ const orderSchema=new Schema({
     },
     status:{
         type:String,
-        enum:['Pending','Dispatched','Out for delivery','Cancelled'],
+        enum:['Pending','Dispatched','Out for delivery','Delivered','Cancelled','Return Requested','Return Approved','Return Rejected','Returned'],
         default:'Pending'
     },
     paymentMode:{
@@ -33,6 +33,19 @@ const orderSchema=new Schema({
         type:Date,
         default:Date.now
     },
+    returnRequest:{
+        isRequested: { type: Boolean, default: false },
+        requestDate: Date,
+        reason: String,
+        status: {
+            type: String,
+            enum: ['pending', 'approved', 'rejected', 'completed'],
+            default: 'pending'
+        },
+        images: [String],
+        responseDate: Date,
+        responseMessage: String
+    }
 },{versionKey:false})
 
 module.exports=mongoose.model("Order",orderSchema)
