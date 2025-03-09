@@ -19,6 +19,35 @@ import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import PaymentIcon from '@mui/icons-material/Payment';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import ClearIcon from '@mui/icons-material/Clear';
+import SaveIcon from '@mui/icons-material/Save';
+import HomeIcon from '@mui/icons-material/Home';
+import BusinessIcon from '@mui/icons-material/Business';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import PhoneIcon from '@mui/icons-material/Phone';
+import PublicIcon from '@mui/icons-material/Public';
+import LocationCityIcon from '@mui/icons-material/LocationCity';
+
+// Update the THEME_COLORS constant
+const THEME_COLORS = {
+  background: '#F3F4F6', // Light gray background
+  cardBg: '#FFFFFF',     // Pure white for cards
+  primary: '#2563EB',    // Vibrant blue
+  primaryLight: '#DBEAFE', // Light blue for hover/selected states
+  secondary: '#64748B',  // Muted blue-gray
+  success: '#10B981',    // Fresh green
+  error: '#EF4444',      // Bright red
+  border: '#E2E8F0',     // Light gray border
+  hover: '#F8FAFC',      // Very light blue hover
+  text: {
+    primary: '#1F2937',  // Dark gray for primary text
+    secondary: '#6B7280' // Medium gray for secondary text
+  },
+  gradient: {
+    primary: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
+    success: 'linear-gradient(135deg, #10B981 0%, #059669 100%)'
+  }
+};
 
 const PriceDetail = ({ label, value, type = "regular" }) => (
   <Stack 
@@ -93,6 +122,31 @@ const OrderSummaryCard = ({ cartItem }) => (
   </Paper>
 );
 
+const StyledTextField = ({ icon, ...props }) => (
+  <TextField
+    {...props}
+    fullWidth
+    variant="outlined"
+    InputProps={{
+      startAdornment: icon && (
+        <Box sx={{ color: 'text.secondary', mr: 1 }}>
+          {icon}
+        </Box>
+      )
+    }}
+    sx={{
+      '& .MuiOutlinedInput-root': {
+        '&:hover fieldset': {
+          borderColor: 'primary.main',
+        },
+        '&.Mui-focused fieldset': {
+          borderColor: 'primary.main',
+        }
+      }
+    }}
+  />
+);
+
 export const OrderSummarySection = ({ 
   orderTotal,
   cartItems,
@@ -112,12 +166,14 @@ export const OrderSummarySection = ({
     <Paper 
       elevation={0}
       sx={{
-        p: { xs: 2, md: 3 },
+        p: { xs: 3, md: 4 },
         border: '1px solid',
-        borderColor: 'divider',
-        borderRadius: 2,
+        borderColor: THEME_COLORS.border,
+        borderRadius: 3,
+        bgcolor: THEME_COLORS.cardBg,
         position: 'sticky',
         top: 24,
+        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05)',
         maxHeight: 'calc(100vh - 48px)',
         overflow: 'auto'
       }}
@@ -235,17 +291,18 @@ export const OrderSummarySection = ({
           justifyContent="space-between" 
           alignItems="center"
           sx={{
-            p: 2,
-            bgcolor: 'primary.light',
-            borderRadius: 1,
-            color: 'white'
+            p: 3,
+            background: THEME_COLORS.gradient.primary,
+            borderRadius: 2,
+            color: 'white',
+            boxShadow: '0 4px 6px -1px rgb(37 99 235 / 0.2)'
           }}
         >
           <Typography variant="h6">
             Total Amount
           </Typography>
           <Typography variant="h5" fontWeight={600}>
-            ₹{formatPrice(finalAmount)}
+            {formatPrice(finalAmount)}
           </Typography>
         </Stack>
 
@@ -259,12 +316,14 @@ export const OrderSummarySection = ({
           sx={{
             py: 2,
             borderRadius: 2,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            background: THEME_COLORS.gradient.primary,
+            boxShadow: '0 4px 12px rgb(37 99 235 / 0.2)',
             '&:hover': {
+              background: THEME_COLORS.gradient.primary,
               transform: 'translateY(-2px)',
-              boxShadow: '0 6px 16px rgba(0,0,0,0.12)'
+              boxShadow: '0 6px 16px rgb(37 99 235 / 0.25)'
             },
-            transition: 'all 0.2s ease'
+            transition: 'all 0.3s ease'
           }}
         >
           {selectedPaymentMethod === 'CARD' ? 'Proceed to Payment' : 'Place Order'}
@@ -426,141 +485,326 @@ export const Checkout = () => {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Grid container spacing={4}>
-        {/* Left Column - Shipping & Payment */}
-        <Grid item xs={12} md={8}>
-          <Stack rowGap={4}>
+    <Box sx={{ 
+      bgcolor: THEME_COLORS.background, 
+      minHeight: '100vh',
+      py: 4 
+    }}>
+      <Container maxWidth="xl">
+        <Grid container spacing={4}>
+          {/* Left Column - Shipping & Payment */}
+          <Grid item xs={12} md={8}>
+            <Stack rowGap={4}>
 
-            {/* heading */}
-            <Stack flexDirection={'row'} columnGap={is480 ? 0.3 : 1} alignItems={'center'}>
-              <motion.div whileHover={{ x: -5 }}>
-                <IconButton component={Link} to={"/cart"}><ArrowBackIcon fontSize={is480 ? "medium" : 'large'} /></IconButton>
-              </motion.div>
-              <Typography variant='h4'>Shipping Information</Typography>
-            </Stack>
-
-            {/* address form */}
-            <Stack component={'form'} noValidate rowGap={2} onSubmit={handleSubmit(handleAddAddress)}>
-              <Stack>
-                <Typography gutterBottom>Type</Typography>
-                <TextField placeholder='Eg. Home, Buisness' {...register("type", { required: true })} />
+              {/* heading */}
+              <Stack flexDirection={'row'} columnGap={is480 ? 0.3 : 1} alignItems={'center'}>
+                <motion.div whileHover={{ x: -5 }}>
+                  <IconButton component={Link} to={"/cart"}><ArrowBackIcon fontSize={is480 ? "medium" : 'large'} /></IconButton>
+                </motion.div>
+                <Typography variant='h4'>Shipping Information</Typography>
               </Stack>
 
-              <Stack>
-                <Typography gutterBottom>Street</Typography>
-                <TextField {...register("street", { required: true })} />
-              </Stack>
-
-              <Stack>
-                <Typography gutterBottom>Country</Typography>
-                <TextField {...register("country", { required: true })} />
-              </Stack>
-
-              <Stack>
-                <Typography gutterBottom>Phone Number</Typography>
-                <TextField type='number' {...register("phoneNumber", { required: true })} />
-              </Stack>
-
-              <Stack flexDirection={'row'}>
-                <Stack width={'100%'}>
-                  <Typography gutterBottom>City</Typography>
-                  <TextField  {...register("city", { required: true })} />
+              {/* address form */}
+              <Stack 
+                component="form" 
+                noValidate 
+                spacing={3} 
+                onSubmit={handleSubmit(handleAddAddress)}
+                sx={{
+                  p: 4,
+                  border: '1px solid',
+                  borderColor: THEME_COLORS.border,
+                  borderRadius: 3,
+                  bgcolor: THEME_COLORS.cardBg,
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+                  '&:hover': {
+                    boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)'
+                  },
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <LocationOnIcon color="primary" />
+                  <Typography variant="h6">Add New Address</Typography>
                 </Stack>
-                <Stack width={'100%'}>
-                  <Typography gutterBottom>State</Typography>
-                  <TextField  {...register("state", { required: true })} />
+
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <StyledTextField
+                      icon={<HomeIcon />}
+                      label="Address Type"
+                      placeholder="Home, Office, etc."
+                      {...register("type", { 
+                        required: "Address type is required" 
+                      })}
+                      error={!!errors.type}
+                      helperText={errors.type?.message}
+                    />
+                  </Grid>
+                  
+                  <Grid item xs={12}>
+                    <StyledTextField
+                      icon={<LocationOnIcon />}
+                      label="Street Address"
+                      multiline
+                      rows={2}
+                      {...register("street", { 
+                        required: "Street address is required" 
+                      })}
+                      error={!!errors.street}
+                      helperText={errors.street?.message}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={6}>
+                    <StyledTextField
+                      icon={<PhoneIcon />}
+                      label="Phone Number"
+                      type="tel"
+                      {...register("phoneNumber", { 
+                        required: "Phone number is required",
+                        pattern: {
+                          value: /^\d{10}$/,
+                          message: "Please enter a valid 10-digit number"
+                        }
+                      })}
+                      error={!!errors.phoneNumber}
+                      helperText={errors.phoneNumber?.message}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={6}>
+                    <StyledTextField
+                      icon={<PublicIcon />}
+                      label="Country"
+                      {...register("country", { 
+                        required: "Country is required" 
+                      })}
+                      error={!!errors.country}
+                      helperText={errors.country?.message}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={4}>
+                    <StyledTextField
+                      icon={<LocationCityIcon />}
+                      label="City"
+                      {...register("city", { 
+                        required: "City is required" 
+                      })}
+                      error={!!errors.city}
+                      helperText={errors.city?.message}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={4}>
+                    <StyledTextField
+                      icon={<LocationCityIcon />}
+                      label="State"
+                      {...register("state", { 
+                        required: "State is required" 
+                      })}
+                      error={!!errors.state}
+                      helperText={errors.state?.message}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={4}>
+                    <StyledTextField
+                      icon={<LocationOnIcon />}
+                      label="Postal Code"
+                      type="number"
+                      {...register("postalCode", { 
+                        required: "Postal code is required",
+                        pattern: {
+                          value: /^\d{6}$/,
+                          message: "Please enter a valid 6-digit postal code"
+                        }
+                      })}
+                      error={!!errors.postalCode}
+                      helperText={errors.postalCode?.message}
+                    />
+                  </Grid>
+                </Grid>
+
+                <Stack 
+                  direction="row" 
+                  spacing={2} 
+                  justifyContent="flex-end"
+                >
+                  <Button
+                    variant="outlined"
+                    color="inherit"
+                    onClick={() => reset()}
+                    startIcon={<ClearIcon />}
+                  >
+                    Reset
+                  </Button>
+                  <LoadingButton
+                    loading={status === 'pending'}
+                    type="submit"
+                    variant="contained"
+                    startIcon={<SaveIcon />}
+                  >
+                    Save Address
+                  </LoadingButton>
                 </Stack>
-                <Stack width={'100%'}>
-                  <Typography gutterBottom>Postal Code</Typography>
-                  <TextField type='number' {...register("postalCode", { required: true })} />
+              </Stack>
+
+              {/* existing address */}
+              <Stack rowGap={3}>
+
+                <Stack>
+                  <Typography variant='h6'>Address</Typography>
+                  <Typography variant='body2' color={'text.secondary'}>Choose from existing Addresses</Typography>
                 </Stack>
-              </Stack>
 
-              <Stack flexDirection={'row'} alignSelf={'flex-end'} columnGap={1}>
-                <LoadingButton loading={status === 'pending'} type='submit' variant='contained'>add</LoadingButton>
-                <Button color='error' variant='outlined' onClick={() => reset()}>Reset</Button>
-              </Stack>
-            </Stack>
-
-            {/* existing address */}
-            <Stack rowGap={3}>
-
-              <Stack>
-                <Typography variant='h6'>Address</Typography>
-                <Typography variant='body2' color={'text.secondary'}>Choose from existing Addresses</Typography>
-              </Stack>
-
-              <Grid container gap={2} width={is900 ? "auto" : '50rem'} justifyContent={'flex-start'} alignContent={'flex-start'}>
-                {
-                  addresses.map((address, index) => (
-                    <FormControl item key={address._id}>
-                      <Stack p={is480 ? 2 : 2} width={is480 ? '100%' : '20rem'} height={is480 ? 'auto' : '15rem'} rowGap={2} component={is480 ? Paper : Paper} elevation={1}>
-
-                        <Stack flexDirection={'row'} alignItems={'center'}>
-                          <Radio checked={selectedAddress === address} name='addressRadioGroup' value={selectedAddress} onChange={(e) => setSelectedAddress(addresses[index])} />
-                          <Typography>{address.type}</Typography>
+                <Grid container spacing={2}>
+                  {addresses.map((address, index) => (
+                    <Grid item xs={12} sm={6} key={address._id}>
+                      <Paper
+                        elevation={0}
+                        sx={{
+                          p: 3,
+                          cursor: 'pointer',
+                          borderRadius: 3,
+                          border: '1px solid',
+                          borderColor: selectedAddress === address ? THEME_COLORS.primary : THEME_COLORS.border,
+                          bgcolor: selectedAddress === address ? THEME_COLORS.primaryLight : THEME_COLORS.cardBg,
+                          transition: 'all 0.3s ease',
+                          '&:hover': {
+                            borderColor: THEME_COLORS.primary,
+                            bgcolor: THEME_COLORS.primaryLight,
+                            transform: 'translateY(-4px)',
+                            boxShadow: '0 10px 15px -3px rgb(37 99 235 / 0.1)'
+                          }
+                        }}
+                        onClick={() => setSelectedAddress(address)}
+                      >
+                        <Stack spacing={2}>
+                          <Stack direction="row" alignItems="center" spacing={1}>
+                            <Radio 
+                              checked={selectedAddress === address}
+                              onChange={() => setSelectedAddress(address)}
+                            />
+                            {address.type.toLowerCase() === 'home' ? 
+                              <HomeIcon color="primary" /> : 
+                              <BusinessIcon color="primary" />
+                            }
+                            <Typography variant="subtitle1" fontWeight={500}>
+                              {address.type}
+                            </Typography>
+                          </Stack>
+                          
+                          <Divider />
+                          
+                          <Stack spacing={1}>
+                            <Typography variant="body2">
+                              {address.street}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {address.city}, {address.state}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {address.country} - {address.postalCode}
+                            </Typography>
+                            <Stack direction="row" alignItems="center" spacing={1}>
+                              <PhoneIcon fontSize="small" color="action" />
+                              <Typography variant="body2" color="text.secondary">
+                                {address.phoneNumber}
+                              </Typography>
+                            </Stack>
+                          </Stack>
                         </Stack>
+                      </Paper>
+                    </Grid>
+                  ))}
+                </Grid>
 
-                        {/* details */}
+              </Stack>
+
+              {/* payment methods */}
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 4,
+                  borderRadius: 3,
+                  border: '1px solid',
+                  borderColor: THEME_COLORS.border,
+                  bgcolor: THEME_COLORS.cardBg,
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'
+                }}
+              >
+                <Stack spacing={3}>
+                  <Typography variant="h6" fontWeight={600} color={THEME_COLORS.secondary}>
+                    Payment Methods
+                  </Typography>
+                  
+                  {['COD', 'CARD'].map((method) => (
+                    <Paper
+                      key={method}
+                      elevation={0}
+                      sx={{
+                        p: 2,
+                        cursor: 'pointer',
+                        borderRadius: 2,
+                        border: '1px solid',
+                        borderColor: selectedPaymentMethod === method ? THEME_COLORS.primary : THEME_COLORS.border,
+                        bgcolor: selectedPaymentMethod === method ? THEME_COLORS.primaryLight : THEME_COLORS.cardBg,
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          borderColor: THEME_COLORS.primary,
+                          bgcolor: THEME_COLORS.primaryLight,
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 8px 12px -3px rgb(37 99 235 / 0.1)'
+                        }
+                      }}
+                      onClick={() => setSelectedPaymentMethod(method)}
+                    >
+                      <Stack direction="row" alignItems="center" spacing={2}>
+                        <Radio 
+                          checked={selectedPaymentMethod === method}
+                          sx={{
+                            '&.Mui-checked': {
+                              color: THEME_COLORS.primary
+                            }
+                          }}
+                        />
+                        {method === 'COD' ? <AttachMoneyIcon /> : <PaymentIcon />}
                         <Stack>
-                          <Typography>{address.street}</Typography>
-                          <Typography>{address.state}, {address.city}, {address.country}, {address.postalCode}</Typography>
-                          <Typography>{address.phoneNumber}</Typography>
+                          <Typography variant="subtitle2">
+                            {method === 'COD' ? 'Cash on Delivery' : 'Pay Online'}
+                          </Typography>
+                          <Typography variant="caption" color={THEME_COLORS.secondary}>
+                            {method === 'COD' ? 'Pay when you receive' : 'Secure payment via Razorpay'}
+                          </Typography>
                         </Stack>
                       </Stack>
-                    </FormControl>
-                  ))
-                }
-              </Grid>
-
-            </Stack>
-
-            {/* payment methods */}
-            <Stack rowGap={3}>
-
-              <Stack>
-                <Typography variant='h6'>Payment Methods</Typography>
-                <Typography variant='body2' color={'text.secondary'}>Please select a payment method</Typography>
-              </Stack>
-
-              <Stack rowGap={2}>
-
-                <Stack flexDirection={'row'} justifyContent={'flex-start'} alignItems={'center'}>
-                  <Radio value={selectedPaymentMethod} name='paymentMethod' checked={selectedPaymentMethod === 'COD'} onChange={() => setSelectedPaymentMethod('COD')} />
-                  <AttachMoneyIcon sx={{ mr: 1 }} />
-                  <Typography>Cash on Delivery</Typography>
+                    </Paper>
+                  ))}
                 </Stack>
-
-                <Stack flexDirection={'row'} justifyContent={'flex-start'} alignItems={'center'}>
-                  <Radio value={selectedPaymentMethod} name='paymentMethod' checked={selectedPaymentMethod === 'CARD'} onChange={() => setSelectedPaymentMethod('CARD')} />
-                  <PaymentIcon sx={{ mr: 1 }} />
-                  <Typography>Razorpay</Typography>
-                </Stack>
-
-              </Stack>
-
+              </Paper>
             </Stack>
-          </Stack>
-        </Grid>
+          </Grid>
 
-        {/* Right Column - Order Summary */}
-        <Grid item xs={12} md={4}>
-          <OrderSummarySection 
-            orderTotal={orderTotal}
-            cartItems={cartItems}  // Add this prop
-            couponCode={couponCode}
-            setCouponCode={setCouponCode}
-            handleApplyCoupon={handleApplyCoupon}
-            appliedCoupon={appliedCoupon}
-            couponError={couponError}
-            calculateDiscount={calculateDiscount}
-            orderStatus={orderStatus}
-            handleCreateOrder={handleCreateOrder}
-            selectedPaymentMethod={selectedPaymentMethod}
-          />
+          {/* Right Column - Order Summary */}
+          <Grid item xs={12} md={4}>
+            <OrderSummarySection 
+              orderTotal={orderTotal}
+              cartItems={cartItems}  // Add this prop
+              couponCode={couponCode}
+              setCouponCode={setCouponCode}
+              handleApplyCoupon={handleApplyCoupon}
+              appliedCoupon={appliedCoupon}
+              couponError={couponError}
+              calculateDiscount={calculateDiscount}
+              orderStatus={orderStatus}
+              handleCreateOrder={handleCreateOrder}
+              selectedPaymentMethod={selectedPaymentMethod}
+            />
+          </Grid>
         </Grid>
-      </Grid>
-    </Container>
+      </Container>
+    </Box>
   );
 };
